@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>NebEngine</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #111;
+            color: white;
+            margin: 0;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #52d1ff;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #b8b8b8;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+            margin: auto;
+        }
+
+        .upload-panel {
+            background: #1b1b1b;
+            padding: 30px;
+            border-radius: 14px;
+            margin-top: 30px;
+        }
+
+        input {
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            color: #111;
+            background: #52d1ff;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #85dfff;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        #resetButton {
+            margin-left: 10px;
+            background: #444;
+            color: white;
+        }
+
+        #resetButton:hover {
+            background: #666;
+        }
+
+        #preview {
+            display: none;
+            width: 100%;
+            max-width: 420px;
+            max-height: 420px;
+            object-fit: contain;
+            margin: 25px auto;
+            border-radius: 12px;
+            background: #090909;
+        }
+
+        .status-panel {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            text-align: left;
+            background: #222;
+            border-radius: 12px;
+        }
+
+        .status-panel h3 {
+            color: #52d1ff;
+            margin-top: 0;
+        }
+
+        .file-information {
+            padding: 15px;
+            margin-bottom: 20px;
+            background: #171717;
+            border-radius: 8px;
+            overflow-wrap: anywhere;
+        }
+
+        .file-information p {
+            margin: 8px 0;
+        }
+
+        .module {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #3b3b3b;
+        }
+
+        .module:last-child {
+            border-bottom: none;
+        }
+
+        .completed {
+            color: #60e391;
+        }
+
+        .pending {
+            color: #999;
+        }
+
+        .error {
+            color: #ff7676;
+        }
+
+        #serverImageContainer {
+            display: none;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        #serverImage {
+             width: 100%;
+             max-width: 420px;
+             max-height: 420px;
+             object-fit: contain;
+             border-radius: 12px;
+             background: #090909;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <main class="container">
+
+        <h1>🌌 NebEngine</h1>
+
+        <h2>NBL-001</h2>
+
+        <section class="upload-panel">
+
+            <p>
+                Selecciona una fotografía de referencia para comenzar.
+            </p>
+
+            <input
+                type="file"
+                id="image"
+                accept="image/*"
+                onchange="previewImage(event)"
+            >
+
+            <img
+                id="preview"
+                alt="Vista previa de la imagen seleccionada"
+            >
+
+            <br>
+
+            <button
+                id="uploadButton"
+                onclick="uploadImage()"
+            >
+                Subir imagen
+            </button>
+
+            <button
+                id="resetButton"
+                onclick="resetInterface()"
+            >
+              Limpiar
+            </button>
+
+        </section>
+
+        <section
+            id="statusPanel"
+            class="status-panel"
+        >
+
+            <h3>Estado del proyecto</h3>
+
+            <div
+                id="fileInformation"
+                class="file-information"
+            >
+                Esperando imagen...
+            </div>
+
+            <div class="module">
+
+                <span>Upload</span>
+
+                <strong
+                    id="uploadStatus"
+                    class="pending"
+                >
+                    Pendiente
+                </strong>
+
+            </div>
+
+            <div class="module">
+
+                <span>Análisis IA</span>
+
+                <strong class="pending">
+                    Próximamente
+                </strong>
+
+            </div>
+
+            <div class="module">
+
+                <span>Blender Pipeline</span>
+
+                <strong class="pending">
+                    Próximamente
+                </strong>
+
+            </div>
+
+            <div class="module">
+
+                <span>Render</span>
+
+                <strong class="pending">
+                    Próximamente
+                </strong>
+
+            </div>
+            <div id="serverImageContainer">
+
+    <h3>Imagen registrada en NebEngine</h3>
+
+    <img
+        id="serverImage"
+        alt="Imagen guardada por NebEngine"
+    >
+
+</div>
+
+        </section>
+
+        
+
+    </main>
+
+    <script>
+
+        function previewImage(event) {
+
+            const preview =
+                document.getElementById("preview");
+
+            const file =
+                event.target.files[0];
+
+            if (!file) {
+
+                preview.style.display = "none";
+                preview.removeAttribute("src");
+
+                return;
+
+            }
+
+            preview.src =
+                URL.createObjectURL(file);
+
+            preview.style.display = "block";
+
+        }
+        function resetInterface() {
+
+        const fileInput =
+            document.getElementById("image");
+
+        const preview =
+            document.getElementById("preview");
+
+        const statusPanel =
+             document.getElementById("statusPanel");
+
+        const fileInformation =
+             document.getElementById("fileInformation");
+
+        const uploadStatus =
+             document.getElementById("uploadStatus");
+
+         const serverImageContainer =
+             document.getElementById("serverImageContainer");
+
+         const serverImage =
+             document.getElementById("serverImage");
+
+         const button =
+              document.getElementById("uploadButton");
+
+        fileInput.value = "";
+
+         preview.removeAttribute("src");
+         preview.style.display = "none";
+
+         serverImage.removeAttribute("src");
+         serverImageContainer.style.display = "none";
+
+         statusPanel.style.display = "none";
+
+         fileInformation.textContent =
+              "Esperando imagen...";
+
+          uploadStatus.textContent =
+               "Pendiente";
+
+          uploadStatus.className =
+               "pending";
+
+          button.textContent =
+              "Subir imagen";
+
+          button.disabled =
+              false;
+
+}
+
+        async function uploadImage() {
+
+    const fileInput =
+        document.getElementById("image");
+
+    const file =
+        fileInput.files[0];
+
+    const maxFileSize =
+         10 * 1024 * 1024;
+
+    const button =
+        document.getElementById("uploadButton");
+
+    const statusPanel =
+        document.getElementById("statusPanel");
+
+    const fileInformation =
+        document.getElementById("fileInformation");
+
+    const uploadStatus =
+        document.getElementById("uploadStatus");
+
+    const serverImageContainer =
+        document.getElementById("serverImageContainer");
+
+    const serverImage =
+        document.getElementById("serverImage");
+
+    if (!file) {
+
+        alert("Selecciona una imagen.");
+
+        return;
+
+    }
+
+    if (!file.type.startsWith("image/")) {
+
+         alert("El archivo seleccionado no es una imagen.");
+
+         return;
+
+    }
+
+    if (file.size > maxFileSize) {
+
+         alert("La imagen supera el límite de 10 MB.");
+
+        return;
+
+    }
+
+    const formData =
+        new FormData();
+
+    formData.append("image", file);
+
+    statusPanel.style.display = "block";
+
+    button.disabled = true;
+    button.textContent = "Subiendo...";
+
+    uploadStatus.textContent = "Procesando";
+    uploadStatus.className = "pending";
+
+const fileSize =
+    (file.size / 1024 / 1024)
+        .toFixed(2);
+
+fileInformation.innerHTML = `
+    <p>
+        <strong>Archivo seleccionado:</strong>
+        ${file.name}
+    </p>
+
+    <p>
+        <strong>Tamaño:</strong>
+        ${fileSize} MB
+    </p>
+
+    <p>
+        Enviando imagen a NebEngine...
+    </p>
+`;
+
+    try {
+
+        const response = await fetch(
+            "/upload",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+        const json =
+            await response.json();
+
+        if (!response.ok || !json.success) {
+
+            throw new Error(
+                json.message ||
+                "No fue posible subir la imagen."
+            );
+
+        }
+
+        fileInformation.innerHTML = `
+            <p>
+                <strong>Mensaje:</strong>
+                ${json.message}
+            </p>
+
+            <p>
+                <strong>Archivo guardado:</strong>
+                ${json.filename}
+            </p>
+
+            <p>
+                <strong>Ruta:</strong>
+                ${json.path}
+            </p>
+        `;
+
+        uploadStatus.textContent = "Completado";
+        uploadStatus.className = "completed";
+
+        serverImage.src =
+            `/reference/${json.filename}`;
+
+        serverImageContainer.style.display =
+            "block";
+
+        button.textContent = "Imagen subida";
+
+    } catch (error) {
+
+        console.error(
+            "Error al subir la imagen:",
+            error
+        );
+
+        serverImageContainer.style.display =
+            "none";
+
+        fileInformation.innerHTML = `
+            <p class="error">
+                <strong>Error:</strong>
+                ${error.message}
+            </p>
+        `;
+
+        uploadStatus.textContent = "Error";
+        uploadStatus.className = "error";
+
+        button.textContent = "Reintentar";
+
+    } finally {
+
+        button.disabled = false;
+
+    }
+
+}
+
+    </script>
+
+</body>
+
+</html>
